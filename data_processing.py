@@ -12,14 +12,14 @@ import random
 
 Alexnet = torchvision.models.alexnet(pretrained=True)
 
-def data_processing(using_data: int, image_folder_path: str, data_entry_csv_path: str,
+def data_processing(num_using_data: int, image_folder_path: str, data_entry_csv_path: str,
                     finding_labels: list, train_data_percent: float,
                     val_data_percent: float, test_data_percent: float,
                     output_folder_name="features", direction="PA"):
     """
     data processing
-    :param using_data: total data we want to process(the number of images being
-                        the sum of training/validation/test data)
+    :param num_using_data: total data we want to process(the number of images
+            being the sum of training/validation/test data)
     :param image_folder_path: the path of folder used to save image
     :param data_entry_csv_path: the path of csv used to save labels
     :param finding_labels: a list contains (diseases or 'No Finding')
@@ -33,7 +33,7 @@ def data_processing(using_data: int, image_folder_path: str, data_entry_csv_path
     assert train_data_percent + val_data_percent + test_data_percent == 1, \
     "sum of train, val, test data is not 100% percent"
 
-    image_map_label = get_data_map(using_data, data_entry_csv_path, finding_labels, direction)
+    image_map_label = get_data_map(num_using_data, data_entry_csv_path, finding_labels, direction)
     create_output_folder(output_folder_name+'_'+direction, finding_labels)
 
     first_pivot =  train_data_percent * 100
@@ -46,7 +46,7 @@ def data_processing(using_data: int, image_folder_path: str, data_entry_csv_path
 
         # it is possible that image type is rgba, but we can convert to greyscale type
         if (image.shape == (224, 224, 4)):
-            image = image[:, :, 0]
+            image = image[:, :, 0] * 0.21 + image[:, :, 1] * 0.72 + image[:,:,2] * 0.07
 
 
         # convert np array shape [224, 224] to tensor [1, 3, 224, 224], read
@@ -95,7 +95,7 @@ def create_output_folder(output_folder_name: str, finding_labels: list):
                 os.mkdir(output_folder_name + type + '/' + disease)
 
 
-def get_data_map(using_data: int,data_entry_csv_path: str,
+def get_data_map(num_using_data: int,data_entry_csv_path: str,
                  finding_labels: list, direction: str):
     """
     read csv and return a list of tuple, the first element in tuple
@@ -107,7 +107,7 @@ def get_data_map(using_data: int,data_entry_csv_path: str,
     title = file.readline() #first line is tile
     line = file.readline()
     n = 0
-    while line is not None and line != '' and n != using_data:
+    while line is not None and line != '' and n != num_using_data:
         line = line.split(',')
         for finding in line[1].split('|'):
             if finding in finding_labels and line[6] == direction:
@@ -121,4 +121,4 @@ def get_data_map(using_data: int,data_entry_csv_path: str,
 
 
 if __name__ == '__main__':
-    data_processing(100, './images', './Data_Entry_2017.csv', ['Hernia', 'No Finding'], 0.6,0.2,0.2, 'test', 'PA')
+    data_processing(1000, './images', './Data_Entry_2017.csv', ['Hernia', 'No Finding','Effusion','Mass'], 0.6,0.15,0.25, 'test', 'AP')
