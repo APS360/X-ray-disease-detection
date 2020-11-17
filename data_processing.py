@@ -118,7 +118,30 @@ def get_data_map(num_using_data: int,data_entry_csv_path: str,
     return image_map_label
 
 
+def convert_image_to_tensor(image_path: str, output_path: str) -> None:
+    """
+    convert an image to tensor
+    """
+    image = np.asarray(Image.open(image_path).resize(
+        (224, 224))) / 255.0
+
+    if (image.shape == (224, 224, 4)):
+        image = image[:, :, 0] * 0.21 + image[:, :, 1] * 0.72 + image[:, :,
+                                                                2] * 0.07
+    rgb_batch = torch.tensor(np.expand_dims(
+        np.repeat(image[..., np.newaxis], 3, -1), axis=0)).\
+        transpose(1, 3).transpose(2, 3).float()
+    features = Alexnet.features(rgb_batch)
+    features_tensor = torch.from_numpy(features.detach().numpy())
+    torch.save(features_tensor.squeeze(0), output_path)
+
+
+
 
 
 if __name__ == '__main__':
-    data_processing(1000, './images', './Data_Entry_2017.csv', ['Hernia', 'No Finding','Effusion','Mass'], 0.6,0.15,0.25, 'test', 'AP')
+    di = ['Cardiomegaly', 'No Finding','Effusion','Infiltration','Mass']
+    # data_processing(2000, './images', './Data_Entry_2017.csv', di, 0.8,0.1,0.1, 'test1', 'AP')
+    data_processing(2000, './images', './Data_Entry_2017.csv',
+                    di, 0.8, 0.1, 0.1, 'test4',
+                    'PA')
