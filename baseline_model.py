@@ -30,7 +30,7 @@ with open("Data_Entry_2017.csv", mode="r") as file:
     #         print(i)
 
 
-def helper2_find_key(d: dict):
+def helper_find_key(d: dict):
     max_value = max(d.values())
     for i in d:
         if d[i] == max_value:
@@ -40,8 +40,10 @@ def get_baseline_model(age, gender):
     if not isinstance(age, int) or gender not in ["M", "F"] or age not in range(0, 155):
         print("the input is incorrect")
     input_key = str(str(age) + gender)
-    print("this person's most likely medical condition is:", helper2_find_key(bm_dict[input_key]))
+    gender_string = "female"
+    if gender == "M":
+        gender_string = "male"
+    print("a", age, "years old", gender_string, "'s most likely medical condition is:", helper_find_key(bm_dict[input_key]))
 
-
-get_baseline_model(10,"M")
+get_baseline_model(30,"F")
 get_baseline_model(91,"M")
